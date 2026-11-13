@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: "ReAKT: Task-Structured Antisymmetric ME-to-MI EEG Transfer"
+message: "If you use this software, please cite the accompanying ReAKT manuscript."
+type: software
+version: 0.2.0
+date-released: 2026-11-13
+license: MIT
+repository-code: "https://github.com/<your-account>/ReAKT"

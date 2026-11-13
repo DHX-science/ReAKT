@@ -1,0 +1,24 @@
+\begin{table*}[!t]
+\caption{MI-only FBCSP-LDA comparison under the subject-level outer-query protocols. The classifier uses nine 4-Hz bands, four CSP components per band, mutual-information selection, shrinkage LDA, and prespecified dataset-specific feature counts (8 for EEGMMIDB; 24 for Lajtos). Values are mean $\pm$ SD; $\Delta$ is ReAKT-C minus FBCSP-LDA.}
+\vspace{10pt}
+\label{tab:classical_baselines}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c r r r}
+\toprule
+Dataset & MI support & FBCSP-LDA mean $\pm$ SD (\%) & ReAKT-C (\%) & $\Delta$ (pp)\\
+\midrule
+EEGMMIDB & 0.20 & 50.97 $\pm$ 5.04 & 76.85 & +25.88\\
+EEGMMIDB & 0.40 & 52.50 $\pm$ 6.73 & 79.04 & +26.54\\
+EEGMMIDB & 0.60 & 53.18 $\pm$ 8.94 & 79.76 & +26.58\\
+EEGMMIDB & 0.80 & 56.09 $\pm$ 9.77 & 80.26 & +24.17\\
+EEGMMIDB & 1.00 & 53.32 $\pm$ 10.77 & 79.75 & +26.43\\
+Lajtos 2023 & 0.25 & 59.68 $\pm$ 13.24 & 76.02 & +16.34\\
+Lajtos 2023 & 0.50 & 64.25 $\pm$ 14.75 & 75.97 & +11.72\\
+Lajtos 2023 & 0.75 & 68.17 $\pm$ 15.88 & 75.54 & +7.37\\
+Lajtos 2023 & 1.00 & 72.15 $\pm$ 15.02 & 76.40 & +4.25\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

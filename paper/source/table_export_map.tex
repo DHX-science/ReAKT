@@ -1,0 +1,23 @@
+\begin{table*}[!t]
+\caption{Mapping of the manuscript's primary and diagnostic exports. The canonical primary export supplies the headline EEGMMIDB component and support-curve estimates, and the strict LORO export supplies the full-cohort external run-disjoint estimates. Diagnostic exports are retained to expose implementation differences and are not pooled with or used to overwrite canonical values.}
+\label{tab:export_map}
+\centering\tiny
+\setlength{\tabcolsep}{2pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{0.19\textwidth} p{0.19\textwidth} p{0.18\textwidth} p{0.16\textwidth} p{0.22\textwidth}}
+\toprule
+Export & Run / state & Gate / protocol & Complete and comparator & Role in manuscript \\ 
+\midrule
+Canonical primary & primary protocol (20261108) & Quantile-matched primary gate; five matched EEGMMIDB folds & 76.85 / 76.27 at support 0.20 & Headline component, support curve, primary controls \\ 
+Checkpoint/split audit & retained audit exports & Distinct audit checkpoint/split states and runner metadata & Diagnostic contrasts only; no primary accuracy is reported & Audit only; does not update the canonical result \\ 
+Legacy fixed-threshold diagnostic & Legacy fixed-threshold gate export & Fixed-threshold release-rate diagnostic; its accuracy contrasts are outside the primary tables & Not used as the primary complete estimate & Release-rate diagnostic outside the primary results \\
+LOO-gate mechanism diagnostic & mechanism-control diagnostic export & Support-LOO-score gate; separate mechanism-control execution & Within-export paired contrasts only & Mechanism-control inference only (S13); not a primary performance estimate \\
+Strict Lajtos LORO & 20261111 full-cohort rerun; 31 participants & Three run-disjoint folds; 20 query trials/run; support 5/10/15/20 per class & 75.16 / 75.70 / 75.86 / 76.29\newline vs 74.84 zero-shot & Canonical external run-disjoint analysis (S11) \\ 
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+
+
+

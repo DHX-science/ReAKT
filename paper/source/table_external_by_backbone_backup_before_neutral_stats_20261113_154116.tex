@@ -1,0 +1,45 @@
+\begin{table*}[!t]
+\caption{External Lajtos 2023 accuracy by representation backbone under the ordinary five-fold protocol. Values are subject-level mean accuracies in percent. The displayed columns are the prespecified neural comparators and ReAKT-C; paired inference was not performed for non-EEGNet cells; ``--'' denotes cells not run under the allocation.}
+\label{tab:external_backbone}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c r r r r r r}
+\toprule
+Backbone & MI support & ME-Finetune & ME-Joint & Deep CORAL & DANN & CDAN & ReAKT-C\\
+\midrule
+EEGNet & 0.25 & 70.54 & 62.15 & 70.32 & 70.05 & 70.16 & 76.02\\
+EEGNet & 0.50 & 69.52 & 68.44 & 69.84 & 70.81 & 71.13 & 75.97\\
+EEGNet & 0.75 & 71.08 & 71.34 & 71.18 & 71.40 & 71.72 & 75.54\\
+EEGNet & 1.00 & 71.56 & 75.81 & 72.37 & 71.94 & 71.99 & 76.40\\
+\addlinespace
+EEG-Conformer & 0.25 & 66.29 & 58.28 & 67.15 & 67.04 & 67.37 & 73.92\\
+EEG-Conformer & 0.50 & 68.33 & 65.59 & 71.18 & 68.55 & 68.28 & 73.17\\
+EEG-Conformer & 0.75 & 68.87 & 69.46 & 72.10 & 70.48 & 70.16 & 72.90\\
+EEG-Conformer & 1.00 & 72.47 & 72.04 & 74.25 & 73.01 & 73.49 & 74.14\\
+\addlinespace
+EEGNeX & 0.25 & 70.75 & 67.31 & 72.42 & 69.95 & 70.75 & 75.43\\
+EEGNeX & 0.50 & 72.15 & 74.09 & 72.80 & 71.34 & 70.91 & 76.61\\
+EEGNeX & 0.75 & 72.85 & 77.20 & 74.73 & 72.58 & 73.71 & 77.10\\
+EEGNeX & 1.00 & 74.25 & 80.38 & 76.34 & 75.75 & 74.52 & 77.58\\
+\addlinespace
+EEG-TCNet & 0.25 & 59.03 & 53.55 & 59.68 & 59.57 & 59.41 & 68.39\\
+EEG-TCNet & 0.50 & 61.24 & 59.73 & 61.67 & 62.15 & 62.04 & 70.91\\
+EEG-TCNet & 0.75 & 62.42 & 64.57 & 64.14 & 65.75 & 65.97 & 72.37\\
+EEG-TCNet & 1.00 & 64.35 & 66.13 & 67.37 & 68.01 & 67.74 & 72.90\\
+\addlinespace
+ATCNet & 0.25 & 66.18 & 59.41 & 66.24 & 66.34 & 66.02 & 72.90\\
+ATCNet & 0.50 & 66.67 & 64.14 & 68.55 & 68.98 & 69.09 & 74.09\\
+ATCNet & 0.75 & 68.98 & 69.95 & 70.48 & 71.99 & 71.83 & 74.19\\
+ATCNet & 1.00 & 70.86 & 72.04 & 71.56 & 72.96 & 72.74 & 74.57\\
+\addlinespace
+MSVTNet & 0.25 & 60.27 & 54.14 & 61.13 & 59.62 & 59.09 & 65.11\\
+MSVTNet & 0.50 & 63.23 & 61.61 & 62.63 & 61.88 & 62.58 & 66.61\\
+MSVTNet & 0.75 & 66.88 & 63.92 & 68.39 & 67.26 & 67.37 & 66.83\\
+MSVTNet & 1.00 & 67.63 & 69.52 & 68.71 & 70.32 & 70.65 & 68.92\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+

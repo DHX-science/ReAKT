@@ -1,0 +1,17 @@
+\begin{table*}[!t]
+\caption{Strict run-disjoint Lajtos 2023 leave-one-run-out (LORO) analysis. All 31 participants contributed three held-out MI runs. Each query run contained 20 trials (10 per class); the remaining two runs supplied 5, 10, 15, or 20 support trials per class at fractions 0.25, 0.50, 0.75, and 1.00. CIs are participant-level percentile-bootstrap 95\% CIs for ReAKT-C minus ME-only zero-shot.}
+\label{tab:lajtos_loro}
+\centering\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{c r r r r c c c}
+\toprule
+Support & ReAKT-C Acc. (\%) & ME-only Acc. (\%) & $\Delta$ (pp) & 95\% CI (pp) & Wilcoxon $p$ & W/T/L & $n$ \\
+\midrule
+0.25 & 75.16 & 74.84 & +0.32 & [-1.13,1.77] & 0.572 & 13/8/10 & 31 \\
+0.50 & 75.70 & 74.84 & +0.86 & [-0.54,2.26] & 0.225 & 17/3/11 & 31 \\
+0.75 & 75.86 & 74.84 & +1.02 & [-0.81,2.80] & 0.241 & 16/3/12 & 31 \\
+1.00 & 76.29 & 74.84 & +1.45 & [-0.27,3.17] & 0.121 & 16/6/9 & 31 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

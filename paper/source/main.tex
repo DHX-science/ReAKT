@@ -1,0 +1,476 @@
+% Neurocomputing submission version based on the \method{} method and results.
+% This file uses the Elsevier elsarticle class and numeric citations.
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{bm}
+\usepackage{url}
+\usepackage{float}
+\usepackage{longtable}
+
+\journal{Neurocomputing}
+\newcommand{\method}{ReAKT}
+\newcommand{\methodc}{ReAKT\mbox{-}C}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{Task-Structured Antisymmetric ME-to-MI EEG Transfer}
+
+\author{Anonymous authors}
+\address{Affiliation information withheld during anonymous review}
+
+\begin{abstract}
+\textbf{Objective:} Motor-execution (ME) recordings can provide a reference for motor-imagery (MI) decoding, but the calibration budget at which labelled MI becomes useful remains unclear. \textbf{Methods:} We introduce task-structured antisymmetric kernel transfer (ReAKT). An ME-supervised EEG backbone is frozen; a task-structured channel involution defines paired odd and even representations, which are read out by a closed-form antisymmetric kernel. An optional support-fitted even residual can be added (ReAKT-C). \textbf{Results:} On 104 EEGMMIDB participants at seven MI trials per class, ReAKT-C reached 76.85\%, 3.3--4.4 points above same-checkpoint control read-outs (72.48--73.60\%). The ME-only zero-shot reference was 77.26\% at this budget; ReAKT-C exceeded it from 14 labelled trials per class onward by 1.78--3.00 points on the canonical EEGMMIDB curve. On Lajtos 2023, ordinary five-fold differences over zero-shot were +1.18/+1.13/+0.70/+1.56 points; the strict run-disjoint LORO comparison gave +0.32--+1.45 points, preserving the direction. An MI-only FBCSP-LDA baseline remained below ReAKT-C at every evaluated support fraction in both datasets. \textbf{Conclusion:} The task-structured involution provides the transferable prior, while the target-private correction supplies an optional residual read-out.
+\end{abstract}
+
+\begin{highlights}
+\item Task-structured involutions transfer frozen ME features from ME to MI.
+\item Control read-outs trail the structured involution view by 3.3--4.4 points.
+\item Labelled MI support adds 1.8--3.0 points only above $\sim$14 trials per class.
+\item ReAKT-C exceeded an MI-only FBCSP-LDA baseline at every evaluated support budget.
+\end{highlights}
+
+\begin{keyword}
+brain--computer interfaces \sep electroencephalography \sep kernel methods \sep motor execution \sep motor imagery \sep transfer learning \sep within-subject decoding
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Motor-imagery (MI) brain--computer interfaces require a decoder to infer a user's intended movement from neural activity without overt movement. In practice, MI decoding is difficult because labelled data are limited, whereas EEG statistics vary across subjects, sessions, and acquisition protocols \cite{lotte2018review,schirrmeister2017deep,lawhern2018eegnet,wolpaw2002bci,nicolasalonso2012review}. During rehabilitation and task practice, the same participant may perform repeated unilateral upper-limb motor-execution (ME) trials, making ME recordings available before an MI-BCI is calibrated. By contrast, MI control generally requires an additional labelled MI calibration session, which is costly in time and user effort. During unilateral upper-limb ME and MI, sensorimotor rhythms in the $\mu$ and $\beta$ bands commonly show contralateral event-related desynchronization (ERD) over primary motor and sensorimotor regions, together with ipsilateral event-related synchronization (ERS) or weaker suppression \cite{pfurtscheller1999,pfurtscheller2001,leocani1997erd}. The shared but non-identical motor substrate of imagined and executed actions has also motivated direct comparisons between ME and MI \cite{decety1996substrate,jeannerod1995imagery,miller2010cortical}. ME recordings from the same subject therefore provide a potentially useful source of supervision for reducing the amount of labelled MI calibration, but ME and MI remain distinct domains and cannot be assumed to be directly exchangeable \cite{schalk2004bci}.
+
+Existing ME-to-MI approaches commonly use target fine-tuning, joint source--target training, covariance alignment, or adversarial domain adaptation \cite{he2020euclidean,long2015dan,sun2016coral,ganin2016dann,long2018cdan,pan2010transfer,bendavid2010domain}. Covariance alignment provides an important alternative for reducing subject and session shifts, but it operates on a joint representation or covariance object rather than explicitly separating an involution-antisymmetric component from a target-private residual. Classical spatial-filtering methods likewise exploit discriminative spatial structure, but do not impose the involution-odd/even decomposition used here \cite{blankertz2008spatial,ang2012filterbank}. These strategies treat the learned representation or its statistics largely as a single object. They do not explicitly separate evidence that is expected to transfer between ME and MI from evidence that may be specific to the current subject and target condition. This distinction becomes particularly important when the target MI support set is small: a feature that is useful in ME may be stable but not target-discriminative, while a target-private feature may be informative but poorly estimated from a few labelled trials.
+
+Task-structured channel transformations provide an additional structural cue for transfer. Let a channel involution be a permutation of the available electrodes that is its own inverse, with the bilateral left--right map used here as one concrete instantiation. This places the construction in the broader family of group actions and equivariant representations \cite{cohen2016group,kondor2018general}, while leaving the transformation to be specified by the task and montage. Applying a task-structured involution before a frozen encoder produces algebraically paired odd and even representations: the odd component changes sign under the transformation, whereas the even component is invariant. In the current upper-limb experiments, the bilateral instantiation is motivated by the task's left--right symmetry. The experiments evaluate the resulting algebraic transfer behavior rather than establishing anatomical lateralization. The even component can include cue-locked auditory or visual responses, global arousal, and volume-conducted EMG or EOG activity, so it is used as a target-private residual rather than as a generic feature-enhancement channel. Neurophysiological comparisons of ME and MI likewise show shared but non-identical motor-cortical dynamics, motivating a representation that preserves task-structured asymmetry while allowing a target-specific correction \cite{miller2010cortical}.
+
+Freezing an ME-supervised representation and re-reading it through
+task-structured antisymmetric structure raises a question that the ME-to-MI
+literature has not answered: how much labelled MI data is actually needed? Most
+studies report a single calibration budget, so the marginal value of target
+labels is unknown, and a source-only transfer rule that already solves the
+problem would be invisible. We therefore treat the calibration budget as the
+independent variable rather than as a nuisance parameter, and we introduce
+we use ReAKT as the read-out that makes the
+curve measurable.
+
+Our contributions are threefold. First, we introduce a closed-form
+task-structured antisymmetric kernel read-out that converts task-structured channel
+symmetry in unilateral upper-limb tasks into a transferable similarity
+structure, and we show that it improves on same-checkpoint, same-fold control
+read-outs by 3.3--4.4 points at the lowest calibration budget. Second, we
+characterize the whole calibration curve rather than a single point: across
+five support fractions and three evaluation protocols, we locate the budget at which labelled
+MI data begin to add value (approximately 14 trials per class) and provide a
+label-free reference against which ME-to-MI adaptation can be measured. Third,
+we isolate what each additional component buys: the structured involution view accounts
+for the main gain, whereas the target-private even correction contributes
++0.58 points at the lowest budget and is negligible thereafter.
+The task-structured involution is isolated with matched controls, and the external
+evaluation includes a filter-bank common-spatial-pattern baseline.
+
+\section{Methods}
+Here ReAKT-C denotes the complete ReAKT configuration, including the even residual and gate.
+
+\subsection{Problem Definition and Notation}
+For each subject, let
+\begin{equation}
+\mathcal{D}_{S}=\{(x_i^S,y_i^S)\}_{i=1}^{n_S},\quad
+\mathcal{D}_{T}^{\mathrm{sup}}=\{(x_i^T,y_i^T)\}_{i=1}^{n_T},\quad
+\mathcal{D}_{T}^{\mathrm{qry}}=\{x_i^Q\},
+\end{equation}
+represent labelled ME source trials, labelled MI support trials, and outer-query MI trials, respectively. Labels are encoded as $y\in\{0,1\}$ and $t=2y-1\in\{-1,+1\}$. The objective is to predict query labels using the ME source and a predefined fraction of labelled MI support trials, while withholding query labels from all fitting, statistic estimation, and gate selection.
+
+\subsection{Frozen ME Representation and Task-Structured Involution Decomposition}
+A replaceable EEG backbone $f_{\theta}$ is supervised on ME source data and frozen during MI adaptation. Let $S_{\mathrm{ME}}$ denote the source-fitted channel standardizer. For a task $\tau$, define a channel involution $\Pi_{\tau}\in\mathbb{R}^{C\times C}$ satisfying
+\begin{equation}
+\Pi_{\tau}^{\mathsf T}\Pi_{\tau}=I_C,\qquad \Pi_{\tau}^{2}=I_C,
+\end{equation}
+where $C$ is the number of available channels. For a trial $x$,
+\begin{equation}
+h(x)=f_{\theta}(S_{\mathrm{ME}}(x)),\qquad
+h_{\tau}(x)=f_{\theta}(S_{\mathrm{ME}}(\Pi_{\tau}x)).
+\end{equation}
+The same frozen representation and task-structured map are used for the ME source, MI support, and outer-query trials. The bilateral electrode map used in the current experiments is the $\tau=\mathrm{bilateral}$ instantiation; it is not a requirement that $C=64$.
+
+The representation is decomposed as
+\begin{equation}
+z^{-}_{\tau}(x)=\frac{h(x)-h_{\tau}(x)}{2},\qquad
+z^{+}_{\tau}(x)=\frac{h(x)+h_{\tau}(x)}{2}.
+\end{equation}
+Because $\Pi_{\tau}^{2}=I_C$,
+\begin{equation}
+h_{\tau}(\Pi_{\tau}x)=h(x),\qquad
+z^{-}_{\tau}(\Pi_{\tau}x)=-z^{-}_{\tau}(x),\qquad
+z^{+}_{\tau}(\Pi_{\tau}x)=z^{+}_{\tau}(x).
+\end{equation}
+Thus the two components are the antisymmetric and invariant projections of the paired encoder outputs, even when the encoder itself is not explicitly equivariant. The decomposition is algebraic and does not assume that the odd component is a literal anatomical hemispheric ratio.
+
+For the present bilateral upper-limb tasks, the involution-odd representation encodes task-related cross-channel asymmetry under the prespecified bilateral map, while the invariant component can contain cue-locked responses, global arousal, and volume-conducted EMG/EOG activity. \method{} uses the latter as a target-private residual correction rather than as an independent feature stream. The decoding results test this algebraic representation rather than anatomical lateralization.
+
+\subsection{Channel-map formulation across montages}
+The construction is defined by a channel map rather than by a fixed channel count. Let
+$\mathcal{C}_{\tau}$ be the channel-name set for task $\tau$ and let
+$\pi_{\tau}:\mathcal{C}_{\tau}\to\mathcal{C}_{\tau}$ satisfy
+$\pi_{\tau}^{2}=\mathrm{id}$. The associated permutation matrix is
+$\Pi_{\tau}$. Paired channels may be homologous bilateral electrodes or another
+prespecified task-preserving pairing; channels without a partner are fixed
+points. The requirements are a valid reciprocal map and a backbone configured
+for the same montage. The present experiments instantiate this construction on
+64-channel EEGMMIDB and the 30-channel Lajtos release. A 20- or 8-channel
+acquisition would therefore require a montage-specific channel map and
+separate validation of that map before the same read-out is applied. If no
+defensible task-preserving pairing is available, the shared source-to-target
+read-out can still be used without imposing an arbitrary involution. The
+remaining sections focus on the bilateral two-element map evaluated here.
+\subsection{Shared Involution-Odd Kernel}
+We arrange each odd representation as $z^-\in\mathbb{R}^{D\times L}$, where $D$ is the feature axis and $L$ is the token or temporal-position axis. For feature axis $j$, a source-only bandwidth is estimated by
+\begin{equation}
+b_j=\max\left(\operatorname{median}_{\{i,k\}:i<k}\|z^-_{i,j}-z^-_{k,j}\|_2^2,10^{-8}\right),
+\end{equation}
+For two odd representations $u$ and $v$, define
+\begin{equation}
+g_j(u,v)=\exp\left(-\frac{\|u_j-v_j\|_2^2}{2b_j}\right),
+\end{equation}
+\begin{equation}
+k^-(u,v)=\frac{1}{2D}\sum_{j=1}^{D}\left[g_j(u,v)-g_j(u,-v)\right].
+\end{equation}
+The computed odd kernel is normalized with a source-only diagonal scale,
+\begin{equation}
+d^-_S=\max\left(\operatorname{mean}_{i\in S}K^-_{ii},10^{-8}\right),
+\qquad
+\widetilde K^-=K^-/d^-_S.
+\end{equation}
+The same source-derived $d^-_S$ is used for source--support, support--support,
+and query--training kernel entries; no target-query statistic is used for this
+normalization. All odd-branch equations below use $\widetilde K^-$. Here $z_{i,j}$ is a vector over the temporal or token axis, so the displayed $\ell_2$ norm is taken over that axis. The denominator uses the median squared source distance as a robust feature-wise bandwidth; the factor 2 fixes the Gaussian parameterization and differs from the alternative $\sigma^2=\operatorname{median}/2$ notation only by a constant convention. The diagonal normalization keeps the kernel scale comparable across folds, while the positive ridge parameter $\rho$ controls conditioning because $K^-$ can be singular.
+
+The kernel changes sign when either argument is reflected and is invariant when both are reflected. Its RKHS is the odd subspace $\mathcal H^-_j=\{f: f(-u)=-f(u)\}$ induced by antisymmetrizing the underlying RBF feature map. It is positive semidefinite because the subtraction is the inner product of two antisymmetrized feature maps. Let $\psi_j$ be a feature map for $g_j$ in its RKHS and define the odd feature map
+\begin{equation}
+\widetilde\psi_j(u_j)=\frac{\psi_j(u_j)-\psi_j(-u_j)}{\sqrt{2}}.
+\end{equation}
+The sign inversion is an isometry, so $g_j(-u,-v)=g_j(u,v)$ and $g_j(-u,v)=g_j(u,-v)$. Consequently,
+\begin{equation}
+\left\langle\widetilde\psi_j(u_j),\widetilde\psi_j(v_j)\right\rangle
+=g_j(u,v)-g_j(u,-v),
+\end{equation}
+and therefore
+\begin{equation}
+k^-(u,v)=\frac{1}{2D}\sum_{j=1}^{D}
+\left\langle\widetilde\psi_j(u_j),\widetilde\psi_j(v_j)\right\rangle.
+\end{equation}
+For any finite sample set and coefficient vector $a$, this gives
+\begin{equation}
+a^{\mathsf T}K^-a=\frac{1}{2D}\sum_{j=1}^{D}
+\left\|\sum_i a_i\widetilde\psi_j(u^{(i)}_j)\right\|_{\mathcal H_j}^{2}\geq0,
+\end{equation}
+which establishes positive semidefiniteness and the associated Hilbert-space formulation; the corresponding kernel-ridge objective is therefore convex. The ME source and MI support are combined in a shared predictor. With $\widetilde K^-_{\mathrm{tr}}$ denoting the normalized combined training matrix and $\rho=1$ \cite{hoerl1970ridge},
+\begin{equation}
+A^-=(\widetilde K^-_{\mathrm{tr}}+\rho I)^{-1},\qquad c^-=A^-t_{\mathrm{tr}}.
+\end{equation}
+For the zero-intercept KRR fit, the exact leave-one-out identity of the linear-smoother literature gives \cite{golub1979gcv} $c_i^-/A_{ii}^-=t_i-\widehat{s}_{\mathrm{odd}}^{(-i)}(x_i)$, where $c^-=A^-t_{\mathrm{tr}}$. Thus, the ratio is the exact LOO residual for training sample $i$. We use the MI-support entries of this ratio to set the intercept to the mean support LOO residual, thereby removing the corresponding mean LOO bias without using an in-sample residual. If $\mathcal I_T$ indexes the MI-support rows in the combined training set, then
+\begin{equation}
+b^- = \frac{1}{|\mathcal I_T|}\sum_{i\in\mathcal I_T}
+\frac{(A^-t_{\mathrm{tr}})_i}{A^-_{ii}}.
+\end{equation}
+The odd score for a query trial is
+\begin{equation}
+s_{\mathrm{odd}}(x)=\widetilde K^-(x,\mathrm{tr})c^-+b^-.
+\end{equation}
+
+The even branch uses a source-scaled, feature-wise RBF kernel. For the even
+representation, its source-only bandwidth and kernel are
+\begin{equation}
+\begin{aligned}
+b_j^+&=\max\left(\operatorname{median}_{i<k}
+\|z^+_{i,j}-z^+_{k,j}\|_2^2,10^{-8}\right),\\
+g_j^+(u,v)&=\exp\left(-\frac{\|u_j-v_j\|_2^2}{2b_j^+}\right).
+\end{aligned}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+k^+(u,v)&=\frac{1}{D}\sum_{j=1}^{D}g_j^+(u,v),\\
+\widetilde K^+&=K^+/d_S^+,\\
+d_S^+&=\max\left(\operatorname{mean}_{i\in S}K^+_{ii},10^{-8}\right).
+\end{aligned}
+\end{equation}
+The bandwidths and the diagonal scale are estimated from ME source trials
+only. The same source-derived quantities are used for all source, support,
+and query entries. Although the implementation may assemble a joint Gram
+matrix for indexing, only the MI-support block and query-to-support block
+enter the private residual fit.
+
+\subsection{Support-Derived Private Correction}
+The even representation is used only to estimate a target-private correction. Let $\phi^+(x)$ be the flattened even representation and let $U$ index the labelled MI support trials. The odd reference is first fitted using the combined ME source and MI support data. To avoid the optimistic in-sample residual, the residual target for each support trial is the exact zero-intercept KRR leave-one-out residual from the combined fit,
+\begin{equation}
+r_{U,i}=\frac{(A^-t_{\mathrm{tr}})_i}{A^-_{ii}},\qquad i\in\mathcal I_T.
+\end{equation}
+The even branch is centered using MI support trials only. With $K^+_{UU}$ denoting the even-kernel matrix on the support set, $H=I-\frac{1}{|U|}\mathbf{1}\mathbf{1}^{\mathsf T}$, and $\rho=1$, we use
+\begin{equation}
+K^{+}_{c}=H K^+_{UU}H,\qquad
+\beta^+=(K^{+}_{c}+\rho I)^{-1}r_U.
+\end{equation}
+Equivalently, to make the centering operation explicit, define the support
+column means, their grand mean, and the query row mean by
+\begin{equation}
+m_U=|U|^{-1}K^+_{UU}\mathbf{1},\qquad
+\bar m_U=|U|^{-1}\mathbf{1}^{\mathsf T}m_U,\qquad
+m(x)=|U|^{-1}k^+(x,U)\mathbf{1}.
+\end{equation}
+Then
+\begin{equation}
+K^+_c=K^+_{UU}-\mathbf{1}m_U^{\mathsf T}-m_U\mathbf{1}^{\mathsf T}
+      +\bar m_U\mathbf{1}\mathbf{1}^{\mathsf T}.
+\end{equation}
+For a query $x$, the corresponding centered cross-kernel row is
+\begin{equation}
+k^+_c(x,U)=k^+(x,U)-m_U^{\mathsf T}-m(x)\mathbf{1}^{\mathsf T}
+      +\bar m_U\mathbf{1}^{\mathsf T},
+\end{equation}
+and the private correction is
+\begin{equation}
+h_{\mathrm{even}}(x)=k^+_c(x,U)\beta^+.
+\end{equation}
+Thus, the even branch is fitted to the residual left by the shared odd reference and is connected only to the current subject's MI support. Constant even features contribute zero after support centering.
+
+\subsection{Balanced Support-Only Gate}
+The even residual is not applied uniformly. For every pair consisting of one
+class-0 and one class-1 MI-support trial, that pair is held out; thus all
+$|U_0||U_1|$ one-from-each-class leave-two-out splits are used. The odd and
+even predictors are refitted using the remaining support trials and the ME
+source, and their predictions on the held-out pair are recorded. Let $o_j$
+denote the resulting inner odd scores. The inner leave-two-out scores define a provisional threshold and an inner release fraction,
+\begin{equation}
+\tau_{\mathrm{in}}=0.25\,\max\left(\operatorname{median}_j |o_j|,10^{-8}\right),\qquad
+q_{\mathrm{in}}=|\{j:|o_j|\leq\tau_{\mathrm{in}}\}|/|\{o_j\}|.
+\end{equation}
+After refitting the odd reference on the complete support set, the primary implementation maps
+$q_{\mathrm{in}}$ to the empirical $q_{\mathrm{in}}$ quantile of the complete-support
+$|s_{\mathrm{odd}}|$ values. This gives $\tau_{\mathrm{gate}}$ without using outer-query labels;
+ties are resolved by the smallest threshold that attains the target fraction. This mapping aligns the
+support score scales but does not guarantee that the realized query release fraction equals
+$q_{\mathrm{in}}$; the fixed-threshold diagnostic is reported separately. After refitting the
+private correction on the complete support set, the outer-query score is
+\begin{equation}
+\begin{aligned}
+s_{\mathrm{ReAKT}}(x)&=s_{\mathrm{odd}}(x)+
+\mathbb{1}\{|s_{\mathrm{odd}}(x)|\leq\tau_{\mathrm{gate}}\}\,
+h_{\mathrm{even}}(x),\\
+\widehat y&=\mathbb{1}[s_{\mathrm{ReAKT}}(x)\geq0].
+\end{aligned}
+\end{equation}
+The gate multiplier $0.25$, residual amplitude $1.0$, and ridge parameter $\rho=1$ are fixed before the confirmation runs. The gate uses only MI-support labels and balanced inner predictions; outer-query labels are absent from the prediction API and are used only after prediction for evaluation. The realized release fraction is recorded as a diagnostic, not as a calibrated confidence estimate. A leave-one-out-score gate is reported as a leakage-control sensitivity, not as the primary implementation.
+
+\section{Experiment Protocol}
+The experiments were evaluated under one canonical analysis protocol, with
+separate exports for development, held-out-run, and external-query
+constructions. The primary tables and control matrix use the canonical export
+identified in the run manifest (Supplementary Table~S14).
+
+\subsection{Datasets and Evaluation Protocols}\label{sec:data}
+The development dataset was PhysioNet EEGMMIDB \cite{goldberger2000physiobank,schalk2004bci}. We retained 104 subjects after excluding S088, S089, S092, S100, and S104. MI runs were R04, R08, and R12; ME runs were R03, R07, and R11. T1 and T2 were mapped to left- and right-fist classes. Five subjects were excluded before decoder training under an a-priori raw-protocol audit: S088 and S092 had 128-Hz recordings, S100 had 128-Hz recordings with 12 task events per run, S089 had an extended R03 with approximately 181 s and 22 events, and S104 had a truncated R08 with approximately 106 s and 13 events. These decisions did not use decoding outcomes. Inputs contained 64 channels sampled at 160 Hz and were cropped to the post-cue interval $[0,4)$ s (640 samples). MI support fractions were 0.2, 0.4, 0.6, 0.8, and 1.0. In EEGMMIDB, ME and MI are recorded in same-day adjacent runs (R03$\rightarrow$R04, R07$\rightarrow$R08, and R11$\rightarrow$R12), so this dataset tests short-interval within-session transfer. A separate held-out-run analysis used the same 104 EEGMMIDB subjects and held out each complete MI run in turn, using the remaining MI runs for adaptation and evaluating the held-out run as the outer query. This run-level task used the five support fractions and three held-out MI runs per subject.
+
+External validation used the Lajtos 2023 dataset \cite{lajtos2023}, with 31 subjects (P001--P031), 30 scalp channels, and 60 ME plus 60 MI trials per subject. Only left- and right-hand trials were retained. MI support fractions were 0.25, 0.50, 0.75, and 1.00. In the ordinary five-fold protocol, each outer training pool contains approximately 24 trials per class; the 0.25, 0.50, 0.75, and 1.00 fractions therefore provide approximately 6, 12, 18, and 24 labelled MI trials per class, with approximately 6 query trials per class. \method{} additionally uses the approximately 30 ME trials per class, whereas MI-only uses only the MI support trials. Thus, the \method{}--MI-only contrast combines a training-sample-size effect with the effect of the task-structured transfer rule. The two datasets were analyzed separately and were not pooled into a single statistical population. The ordinary five-fold Lajtos analysis is trial-level stratified and is not run-disjoint: each MI run contributes trials to both support and query across different folds. We therefore added a strict three-fold leave-one-run-out sensitivity analysis, in which one complete MI run (10 trials per class) is the query and the other two runs provide support. The processed package contains 60 MI trials per participant, with 10 trials per class in each of the three MI runs, for all 31 participants. The strict LORO rerun used each participant's archived three MI run IDs, held out one complete run at a time, and used the other two runs for support. Every participant contributed 20 query trials per held-out run (10 per class); support contained 5, 10, 15, or 20 trials per class at fractions 0.25, 0.50, 0.75, and 1.00, respectively. All 31 participants therefore contributed complete run-disjoint predictions. The released package does not list the three participants excluded in the original publication, so all 31 are retained.
+
+\begin{table*}[!t]
+\caption{Summary of the three evaluation protocols.}
+\label{tab:protocols}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.16\textwidth}L{0.27\textwidth}L{0.27\textwidth}L{0.27\textwidth}}
+\toprule
+Item & EEGMMIDB development set & EEGMMIDB held-out-run analysis & Lajtos 2023 external validation \\
+\midrule
+Subjects & 104; five a-priori raw-protocol exclusions$^\dagger$ & 104; same inclusion criteria & 31; all P001--P031 retained \\
+Channels and sampling & 64 channels, 160 Hz & 64 channels, 160 Hz & 30 scalp channels, 160 Hz after 500-to-160 Hz resampling \\
+Window & Post-cue $[0,4)$ s, 640 samples & Post-cue $[0,4)$ s, 640 samples & Post-cue $[0,4)$ s, 640 samples \\
+Preprocessing & 0.5--50 Hz band-pass, 20-component ICA using Fp1/Fp2 as EOG references, baseline correction & Same EEGMMIDB preprocessing & 1--40 Hz zero-phase FIR, CAR, resampling; no ICA, rejection, interpolation, baseline correction, or augmentation \\
+Outer evaluation & Five-fold trial$\times$class stratification within subject & Three complete MI runs held out in turn; remaining runs used for adaptation & Five-fold trial$\times$class stratification within subject; strict LORO sensitivity \\
+Support fractions & 0.2, 0.4, 0.6, 0.8, 1.0 & 0.2, 0.4, 0.6, 0.8, 1.0 & 0.25, 0.50, 0.75, 1.00 \\
+Evaluation role & Development evaluation & Run-level robustness evaluation & Independent external validation; exploratory generalization analysis \\
+\bottomrule
+\end{tabular}
+}%
+\end{table*}
+
+\noindent\footnotesize $^{\dagger}$The five excluded EEGMMIDB subjects are S088, S089, S092, S100, and S104, as described in Section~\ref{sec:data}. No participant was excluded from the external dataset.
+
+\subsection{Preprocessing, Splits, and Normalization}
+EEGMMIDB epochs were prepared with a 0.5--50 Hz band-pass filter, 20-component ICA using Fp1/Fp2 as EOG references, trial-locked epochs from $-0.5$ to 4.0 s, and baseline correction using $[-0.5,0)$ s. ICA was fitted on the complete run before epoching; the decomposition for a run therefore used all trials from that run, including trials later assigned to the outer query. The model input was the post-cue interval only.
+
+For Lajtos 2023, PsychoPy event markers were aligned to the nearest EEG sample. The released package exposed 30 scalp channels; the identity of the two channels omitted relative to the 32-channel acquisition is not included in the release. These 30 channels were retained, followed by a 1--40 Hz 1651-tap Hamming-window FIR filter, common-average reference, polyphase resampling from 500 to 160 Hz, and cropping to 0--4 s. The Lajtos epochs were used without ICA, artifact rejection, interpolation, baseline correction, or augmentation.
+
+For EEGMMIDB development, outer folds were fixed before training using trial$\times$class stratification and split seed 20260814. The ordinary Lajtos analysis used the analogous trial-level stratification; its strict sensitivity analysis used complete-run holdouts. The MI support set was nested within the outer training pool; the outer query fold was never used for parameter fitting. Channel-wise standardization was fitted on authorized training trials only. For transfer methods, the reference statistics were estimated from ME source trials with $\epsilon=10^{-6}$. The task transform was applied in the raw channel order before the same ME standardizer was applied to both views.
+
+\subsection{Task-Structured Channel Involutions}
+The current datasets instantiate two channel maps. For EEGMMIDB, $\Pi_{\mathrm{bilateral}}$ uses 27 homologous electrode pairs and 10 unchanged midline channels, covering all 64 channels. The swapped pairs are Fc5/Fc6, Fc3/Fc4, Fc1/Fc2, C5/C6, C3/C4, C1/C2, Cp5/Cp6, Cp1/Cp2, Fp1/Fp2, Af7/Af8, Af3/Af4, F7/F8, F5/F6, F3/F4, F1/F2, Ft7/Ft8, T7/T8, T9/T10, Tp7/Tp8, P7/P8, P5/P6, P3/P4, P1/P2, Po7/Po8, Po3/Po4, and O1/O2. The unchanged channels are Fcz, Fpz, Afz, Fz, Cz, Cpz, Pz, Poz, Oz, and Iz. For Lajtos, the released 30-channel layout uses 13 homologous pairs (Fp1/Fp2, F3/F4, F7/F8, FT9/FT10, FC5/FC6, FC1/FC2, C3/C4, T7/T8, CP5/CP6, CP1/CP2, P3/P4, P7/P8, and O1/O2) and four unchanged midline channels (Fz, Cz, Pz, and Oz).
+
+These maps are instances of the general channel involution $\Pi_{\tau}$ defined above. The implementation constructs a map from electrode names, verifies reciprocal pairing and $\Pi_{\tau}^{2}=I$, and stops before feature extraction if the supplied montage does not match the prespecified map. A lower-channel montage is therefore handled by defining a new map on its available channel names and configuring the backbone input for that montage; the method does not require 64 channels. The present results validate the 64-channel and 30-channel instantiations, while the 20-/8-channel and non-bilateral extensions are specified by the same algebra and require their own data-dependent validation.
+
+\subsection{Backbones, Baselines, and Training}
+The representation backbones were EEGNet \cite{lawhern2018eegnet}, EEG-Conformer \cite{song2023eegconformer}, EEGNeX \cite{chen2024eegnex}, EEG-TCNet \cite{ingolfsson2020eegtcnet}, ATCNet \cite{altaheri2023atcnet}, and MSVTNet \cite{liu2024msvtnet}. ME-only zero-shot transfer was the primary comparator because it isolates the value of labelled MI support. ME-Finetune was retained as a secondary labelled-adaptation baseline. A nine-band filter-bank common-spatial-pattern classifier with shrinkage LDA (FBCSP-LDA) was added as a representation-independent classical baseline. The pipeline used nine 4-Hz bands from 4--40~Hz, four CSP components per band, mutual-information feature selection, and shrinkage LDA. It operated on the same protocol-specific preprocessed raw-EEG epochs used before backbone feature extraction, rather than on frozen-backbone features. It was fitted only on the labelled MI support trials and did not use ME source trials. For EEGMMIDB it used the 0.5--50~Hz, 160-Hz, 0--4-s epochs after the stated run-level ICA preprocessing and selected eight features; for Lajtos it used the corresponding 160-Hz, 0--4-s epochs without ICA and selected 24 features. The two feature counts were fixed before the rerun. Recent ME-to-MI decoding studies likewise use deep source--target transfer or domain-aware adaptation, but generally report a single calibration budget rather than a full zero-shot-to-support curve \cite{kaviri2025me_mi,wang2026me_mi}. Neural methods used batch size 16, maximum 150 epochs, patience 25, weight decay $10^{-4}$, and minimum improvement $10^{-4}$. The prespecified ME-Finetune used learning rate 0.0003; low-budget epoch selection at MI fractions 0.2 and 0.4 used three inner folds, while the 0.6--1.0 fractions followed the fixed source-validation schedule. No outer-query performance was used for epoch selection. All training, normalization, epoch selection, and alignment statistics excluded outer-test trials. The prespecified development allocation evaluated EEGNet at all five support fractions and the other modern backbones at 0.2, 0.4, and 1.0. A mirror-augmentation KRR baseline was included in the canonical control run. Engineering-cost and training-loss diagnostics are provided in Supplementary Figs.~S1--S2.
+
+\subsection{Task-Structured Involution Control Matrix}
+The control matrix was prespecified for EEGNet at MI support fraction 0.2 on
+all 104 development participants. It includes unreflected RBF-KRR, random and
+local pairing controls, direct double-kernel and ungated odd-plus-even
+controls, odd-only, mirror augmentation, and ME-only zero-shot transfer. All
+controls use the same frozen checkpoint bundle, outer folds, support protocol,
+and subject-level aggregation as ReAKT-C. Full paired statistics and the
+random-involution audit are supplied in the supplementary material.
+
+\subsection{Evaluation and Statistical Analysis}
+Each outer fold produced trial-level out-of-fold predictions. Five folds were averaged within each participant before the participant-level mean was computed. Accuracy was the primary outcome; balanced accuracy, macro-F1, kappa, and ROC-AUC were retained where defined. The primary paired comparison was a two-sided Wilcoxon signed-rank test across participants, with paired $t$ intervals reported as a sensitivity analysis. Friedman tests were used for omnibus comparisons within each support cell. Benjamini--Hochberg correction was applied separately within each prespecified comparator family and metric. The component family contains $m=2$ support-specific tests (0.20 and 0.40), the development zero-shot curve contains $m=5$ tests, and the Friedman omnibus family contains five support-specific tests with nine methods per support cell; the exact $p\rightarrow q$ table is supplied in the machine-readable supplement. The ME-only zero-shot model is a formal primary reference, whereas ME-Finetune and the alignment methods are secondary labelled baselines. For the zero-shot comparison, a $\pm1$ percentage-point TOST margin was specified in advance; a nonsignificant superiority test was not treated as evidence of equivalence. Extremely small signed-rank values use the normal approximation with continuity correction and are reported with the software lower bound when applicable. Wins, ties, and losses are reported for paired accuracy contrasts. The canonical EEGMMIDB development tables and the control matrix use one frozen checkpoint bundle, one split bundle, and the canonical analysis code; external and held-out-run protocols are reported separately because their outer-query construction differs. The ordinary five-fold Lajtos results and the strict run-disjoint LORO sensitivity use the protocols defined in Section~\ref{sec:data}; their estimates are reported separately because their outer-query constructions differ.
+\section{Results}
+
+
+\subsection{The task-structured control matrix}
+\input{table_m1_controls.tex}
+
+At the lowest budget (seven labelled MI trials per class), ReAKT-C reached 76.85\%. The same-checkpoint, same-fold control read-outs were 72.48\% (frozen $h$ + RBF-KRR), 73.60\% (random involution), 72.98\% (direct double-kernel), and 73.51\% (local adjacent involution), giving gains of 3.3--4.4 points (Table~\ref{tab:primary_controls} and Fig.~\ref{fig:control_matrix}). Mirror augmentation reached 75.90\% (0.95 points below ReAKT-C) and the ungated odd-plus-even sum 76.35\%, recovering most of the structured-involution gain; the structured involution view, rather than the specific kernel, is therefore the main effect. The odd-only variant was 76.27\%, and the complete-minus-odd contrast was +0.58 points at this support level.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.94\textwidth]{Fig2_revised_control_matrix.pdf}
+\caption{Canonical EEGMMIDB EEGNet control matrix at MI support fraction 0.20. Panel A orders the read-outs by subject-level accuracy and marks the ME-only zero-shot reference. Panel B decomposes the observed gain cumulatively into the structured involution view, mirror augmentation, the ungated odd-plus-even read-out, and the gated add-on.}
+\label{fig:control_matrix}
+\end{figure*}
+
+\subsection{The calibration curve}
+The ME-only zero-shot reference was 77.26\% and is constant across support fractions because it uses no MI labels. ReAKT-C was 76.85, 79.04, 79.76, 80.26, and 79.75\% at support fractions 0.2--1.0, corresponding to differences of $-0.40$, +1.78, +2.50, +3.00, and +2.49 points. Thus, on this canonical EEGMMIDB EEGNet protocol, the empirical crossover occurs at 0.4, approximately 14 labelled MI trials per class; the 0.2 comparison remains below the zero-shot reference. The five-point curve is the formal calibration result and its paired inference is given in Table~\ref{tab:zero_shot_curve} and Fig.~\ref{fig:zero_shot_curve}.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.93\textwidth]{Fig3_revised_calibration_protocols.pdf}
+\caption{Calibration curve and protocol dependence. Panel A shows the canonical EEGMMIDB EEGNet accuracy curve; panel B shows the paired ReAKT-C minus zero-shot contrasts with their reported 95\% confidence intervals; panel C shows the EEGMMIDB held-out-run gains; panel D compares ordinary five-fold and strict LORO gains on Lajtos 2023. The ME-only zero-shot reference is constant in panel A because it uses no MI labels.}
+\label{fig:zero_shot_curve}
+\end{figure*}
+
+\input{table_zero_shot_curve.tex}
+
+\subsection{The private correction is optional}\label{sec:correction}
+The even residual is optional. At 0.2 support, ReAKT-C was 0.58 points above odd-only (95\% CI [0.11,1.06]; Wilcoxon $p=0.0284$; BH $q=0.0569$). The differences at 0.4--1.0 were +0.12, $-0.02$, $-0.10$, and $-0.11$ points. The correction is confined to the lowest budget; the structured involution view carries the main gain. The support-derived gate released a median 11.1\% of outer-query trials, close to the 10.8--11.6\% design target; this is a release-rate diagnostic rather than a confidence calibration.
+\subsection{External validation and held-out-run analysis}
+\input{table_classical_baselines.tex}
+The external and run-held-out analyses used the same EEGNet comparator. In the ordinary trial-stratified five-fold Lajtos protocol, ReAKT-C exceeded ME-only zero-shot by +1.18, +1.13, +0.70, and +1.56 percentage points at support fractions 0.25, 0.50, 0.75, and 1.00, respectively. The raw paired $p$ values were 0.115, 0.118, 0.459, and 0.0545; the corresponding BH-adjusted values are reported in Supplementary Table~S10. Under the strict full-cohort three-fold LORO protocol, the corresponding differences were +0.32, +0.86, +1.02, and +1.45 points across all 31 participants, with positive direction; the 95\% CIs included zero at all four support levels (Supplementary Table~S11). The EEGMMIDB held-out-run analysis gave differences of $-0.91$, +0.67, +1.18, +2.63, and +2.59 points from 0.2 to 1.0 support; its full paired inference is reported in Supplementary Table~S10.
+
+The representation-independent FBCSP-LDA baseline was 50.97--56.09\% on EEGMMIDB and 59.68--72.15\% on Lajtos, whereas ReAKT-C was numerically higher at every evaluated support fraction (Table~\ref{tab:classical_baselines} and Fig.~\ref{fig:external_validation}). FBCSP-LDA is trained on MI support only and receives no ME source trials; at the lowest EEGMMIDB budget it is near chance (50.97\%) because it uses seven MI trials per class. On Lajtos the gap narrowed to +4.25 points at full support (Supplementary Table~S17). Cross-backbone development results are in Supplementary Table~S15 (ReAKT-C numerically highest in all 20 non-missing cells); external backbone and held-out results are in Supplementary Tables~S16 and~S10.
+Table~\ref{tab:cross_protocol_backbone} places the same representation backbone and neural comparators on a common low-support scale across the development and external protocols. Each row reports the five baseline accuracies, ReAKT-C accuracy, and the gain over the strongest listed baseline. The canonical EEGNet paired results are reported in Supplementary Tables~S10--S11.
+
+\input{table_cross_protocol_backbone.tex}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.96\textwidth]{Fig4_revised_generalization_fbcsp.pdf}
+\caption{Cross-backbone generalization matrix. Panels A and B show ReAKT-C accuracy and gain over the strongest listed neural comparator on the EEGMMIDB development protocol. Panels C and D show the corresponding quantities under the ordinary five-fold Lajtos 2023 protocol. Each cell is a subject-level mean; unavailable prespecified cells remain blank. The canonical EEGNet paired results are reported in Supplementary Tables~S10--S11.}
+\label{fig:backbone_generalization}
+\end{figure*}
+
+The backbone matrices in Fig.~\ref{fig:backbone_generalization} make the cross-backbone pattern explicit. ReAKT-C is above the strongest listed neural comparator in all 20 non-missing development cells. In the ordinary five-fold Lajtos analysis, all six backbones show a positive margin at the lowest support fraction; the margin narrows or reverses at higher support for EEG-Conformer, EEGNeX, and MSVTNet. These profiles follow the prespecified support allocation.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.96\textwidth]{Fig5_external_validation.pdf}
+\caption{External and classical-reference validation. Panel A shows the EEGMMIDB held-out-run accuracy curve against the ME-only zero-shot reference. Panel B shows ReAKT-C minus zero-shot gains for the ordinary Lajtos five-fold and strict run-disjoint LORO protocols. Panels C and D compare ReAKT-C with the MI-only FBCSP-LDA reference on EEGMMIDB and Lajtos, respectively; shaded bands show the reported FBCSP subject-level standard deviations.}
+\label{fig:external_validation}
+\end{figure*}
+
+\section{Discussion}
+The control matrix isolates the task-structured geometry. Removing it (frozen $h$ + RBF-KRR, 72.48\%) costs 4.37 points; randomizing the pairing (73.60\%) costs 3.26; replacing the antisymmetric kernel with a direct double-kernel (72.98\%) costs 3.88; and using a local adjacent involution (73.51\%) costs 3.34. Controls that retain the structured involution view but simplify the read-out are closer: mirror augmentation reaches 75.90\% and the ungated odd-plus-even sum 76.35\%.
+
+The algebra explains the kernel's contribution. Because $z^+_{\tau}=(h+h_{\tau})/2$ and $z^-_{\tau}=(h-h_{\tau})/2$ are an invertible linear change of coordinates, the decomposition itself does not create information. Its geometric effect is different: the antisymmetric kernel measures similarity only in the odd subspace, so the even subspace contributes zero to the RKHS inner product. This is equivalent to a hard projection that removes common-mode or nuisance directions from the similarity metric. The mirror-augmentation result recovers most of the same gain, showing that the structured involution view is the principal ingredient; the closed-form kernel provides a convex, decomposable implementation of the structured involution view.
+
+The calibration curve gives a practical operating rule. At seven labelled trials per class, the ME-only zero-shot reference is already competitive. At approximately 14 trials per class and above, ReAKT-C is higher on the canonical EEGMMIDB curve. The optional target-private correction reaches +0.58 points at the lowest budget and is negligible thereafter; it is a small add-on to the task-structured kernel read-out. For a task with a validated task-structured involution, zero-shot is the safer reference below this budget and ReAKT can be considered once roughly 14 labelled trials per class are available.
+
+The external findings are directionally consistent across protocols. In the ordinary five-fold Lajtos protocol, ReAKT-C exceeded zero-shot at all four support fractions; the strict full-cohort LORO comparison preserved the direction with a smaller magnitude (Supplementary Tables~S10--S11). The FBCSP-LDA baseline remained below ReAKT-C at every evaluated budget (Table~\ref{tab:classical_baselines}); FBCSP-LDA uses MI support only, whereas ReAKT-C also uses ME source trials.
+
+The present experiments instantiate one bilateral task-structured channel involution on same-day, single-session recordings. The formulation itself is channel-map based: a new montage supplies a new validated involution, and multiple label-preserving involutions can be combined through the group projectors defined above. 
+
+\section{Conclusion}
+ReAKT provides a task-structured reference for ME-to-MI EEG transfer. The task-structured read-out achieved a 3.3--4.4-point advantage over the basic same-checkpoint controls, while the optional target-private correction adds less than one point at the lowest budget. A strong ME-only zero-shot reference is already competitive at seven trials per class; labelled support becomes useful from approximately 14 trials per class. External gains were positive in both Lajtos protocols, with strict LORO preserving the direction. The task-structured kernel provides the transfer read-out, and the target-private correction is a small add-on.
+\section*{Acknowledgment}
+The authors thank the dataset contributors and the maintainers of the open-source EEG analysis software used in this study.
+
+\section*{Funding}
+This research received no specific grant from public, commercial, or not-for-profit funding agencies.
+
+\section*{Ethics statement}
+The study analyzed de-identified, openly available EEG datasets. The original data collections reported their respective institutional ethics and consent procedures; no new human-subject recruitment or intervention was performed for this analysis.
+
+\section*{Declaration of competing interest}
+The authors declare no competing financial or personal interests that could have influenced the work reported in this manuscript.
+
+\section*{Data availability}
+The EEGMMIDB and Lajtos 2023 datasets are available from their original repositories or publications subject to the terms set by their data providers. Derived tables and statistical audit files are included with the submission package.
+
+\section*{Code availability}
+An anonymized runnable package is supplied with the submission and includes the analysis source, protocol files, figure sources, run manifests, and machine-readable statistical exports needed to reproduce the primary analyses.
+
+\section*{CRediT authorship contribution statement}
+Conceptualization: Anonymous authors. Methodology: Anonymous authors. Software: Anonymous authors. Formal analysis: Anonymous authors. Investigation: Anonymous authors. Writing--original draft: Anonymous authors. Writing--review and editing: Anonymous authors. Visualization: Anonymous authors.
+
+\begin{thebibliography}{00}
+\bibitem{lotte2018review} F. Lotte, L. Bougrain, A. Cichocki, M. Clerc, M. Congedo, A. Rakotomamonjy, and F. Yger, ``A review of classification algorithms for EEG-based brain--computer interfaces: A 10 year update,'' \emph{J. Neural Eng.}, vol. 15, no. 3, Art. no. 031005, 2018.
+\bibitem{schirrmeister2017deep} R. T. Schirrmeister \emph{et al.}, ``Deep learning with convolutional neural networks for EEG decoding and visualization,'' \emph{Hum. Brain Mapp.}, vol. 38, no. 11, pp. 5391--5420, 2017.
+\bibitem{lawhern2018eegnet} V. J. Lawhern \emph{et al.}, ``EEGNet: A compact convolutional neural network for EEG-based brain--computer interfaces,'' \emph{J. Neural Eng.}, vol. 15, no. 5, Art. no. 056013, 2018.
+\bibitem{wolpaw2002bci} J. R. Wolpaw, N. Birbaumer, D. J. McFarland, G. Pfurtscheller, and T. M. Vaughan, ``Brain--computer interfaces for communication and control,'' \emph{Clin. Neurophysiol.}, vol. 113, no. 6, pp. 767--791, 2002, doi: 10.1016/S1388-2457(02)00057-3.
+\bibitem{nicolasalonso2012review} L. F. Nicolas-Alonso and J. Gomez-Gil, ``Brain computer interfaces, a review,'' \emph{Sensors}, vol. 12, no. 2, pp. 1211--1279, 2012, doi: 10.3390/s120201211.
+\bibitem{pfurtscheller1999} G. Pfurtscheller and F. H. Lopes da Silva, ``Event-related EEG/MEG synchronization and desynchronization: Basic principles,'' \emph{Clin. Neurophysiol.}, vol. 110, no. 11, pp. 1842--1857, 1999.
+\bibitem{pfurtscheller2001} G. Pfurtscheller and C. Neuper, ``Motor imagery and direct brain--computer communication,'' \emph{Proc. IEEE}, vol. 89, no. 7, pp. 1123--1135, 2001.
+\bibitem{leocani1997erd} L. Leocani, C. Toro, P. Manganotti, P. Zhuang, and M. Hallett, ``Event-related coherence and event-related desynchronization/synchronization in the 10 Hz and 20 Hz EEG during self-paced movements,'' \emph{Electroencephalogr. Clin. Neurophysiol.}, vol. 104, no. 3, pp. 199--206, 1997, doi: 10.1016/S0168-5597(96)96051-7.
+\bibitem{decety1996substrate} J. Decety, ``Do imagined and executed actions share the same neural substrate?'' \emph{Cogn. Brain Res.}, vol. 3, no. 2, pp. 87--93, 1996, doi: 10.1016/0926-6410(95)00033-X.
+\bibitem{jeannerod1995imagery} M. Jeannerod, ``Mental imagery in the motor context,'' \emph{Neuropsychologia}, vol. 33, no. 11, pp. 1419--1432, 1995.
+\bibitem{miller2010cortical} K. J. Miller, G. Schalk, E. E. Fetz, M. den Nijs, J. G. Ojemann, and R. P. N. Rao, ``Cortical activity during motor execution, motor imagery, and imagery-based online feedback,'' \emph{Proc. Natl. Acad. Sci. USA}, vol. 107, no. 9, pp. 4430--4435, 2010, doi: 10.1073/pnas.0913697107.
+\bibitem{schalk2004bci} G. Schalk \emph{et al.}, ``BCI2000: A general-purpose brain--computer interface (BCI) system,'' \emph{IEEE Trans. Biomed. Eng.}, vol. 51, no. 6, pp. 1034--1043, 2004.
+\bibitem{he2020euclidean} H. He and D. Wu, ``Transfer learning for brain--computer interfaces: A Euclidean space data alignment approach,'' \emph{IEEE Trans. Biomed. Eng.}, vol. 67, no. 2, pp. 399--410, 2020.
+\bibitem{long2015dan} M. Long, Y. Cao, J. Wang, and M. Jordan, ``Learning transferable features with deep adaptation networks,'' in \emph{Proc. 32nd Int. Conf. Mach. Learn.}, 2015, pp. 97--105.
+\bibitem{sun2016coral} B. Sun and K. Saenko, ``Deep CORAL: Correlation alignment for deep domain adaptation,'' in \emph{Proc. Eur. Conf. Comput. Vis. Workshops}, 2016, pp. 443--450.
+\bibitem{ganin2016dann} Y. Ganin \emph{et al.}, ``Domain-adversarial training of neural networks,'' \emph{J. Mach. Learn. Res.}, vol. 17, no. 59, pp. 1--35, 2016.
+\bibitem{long2018cdan} M. Long \emph{et al.}, ``Conditional adversarial domain adaptation,'' in \emph{Advances in Neural Information Processing Systems}, vol. 31, 2018, pp. 3936--3947.
+\bibitem{pan2010transfer} S. J. Pan and Q. Yang, ``A survey on transfer learning,'' \emph{IEEE Trans. Knowl. Data Eng.}, vol. 22, no. 10, pp. 1345--1359, 2010, doi: 10.1109/TKDE.2009.191.
+\bibitem{bendavid2010domain} S. Ben-David, J. Blitzer, K. Crammer, A. Kulesza, F. Pereira, and J. W. Vaughan, ``A theory of learning from different domains,'' \emph{Mach. Learn.}, vol. 79, nos. 1--2, pp. 151--175, 2010, doi: 10.1007/s10994-009-5152-4.
+\bibitem{cohen2016group} T. S. Cohen and M. Welling, ``Group equivariant convolutional networks,'' in \emph{Proc. 33rd Int. Conf. Mach. Learn.}, 2016, pp. 2990--2999.
+\bibitem{kondor2018general} R. Kondor and S. Trivedi, ``On the generalization of equivariance and convolution in neural networks to the action of compact groups,'' in \emph{Proc. 35th Int. Conf. Mach. Learn.}, 2018, pp. 2747--2755.
+\bibitem{blankertz2008spatial} B. Blankertz, R. Tomioka, S. Lemm, M. Kawanabe, and K.-R. Müller, ``Optimizing spatial filters for robust EEG single-trial analysis,'' \emph{IEEE Signal Process. Mag.}, vol. 25, no. 1, pp. 41--56, 2008, doi: 10.1109/MSP.2008.4408441.
+\bibitem{ang2012filterbank} K. K. Ang, Z. Y. Chin, C. Wang, C. Guan, and H. Zhang, ``Filter bank common spatial pattern algorithm on BCI competition IV datasets 2a and 2b,'' \emph{Front. Neurosci.}, vol. 6, Art. no. 39, 2012, doi: 10.3389/fnins.2012.00039.
+\bibitem{goldberger2000physiobank} A. L. Goldberger \emph{et al.}, ``PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals,'' \emph{Circulation}, vol. 101, no. 23, pp. e215--e220, 2000.
+\bibitem{lajtos2023} M. Lajtos, L. A. Barradas-Chacón, and S. C. Wriessnegger, ``Effects of handedness on brain oscillatory activity during imagery and execution of upper limb movements,'' \emph{Front. Psychol.}, vol. 14, Art. no. 1161613, 2023, doi: 10.3389/fpsyg.2023.1161613.
+\bibitem{kaviri2025me_mi} S. M. Kaviri and R. Vinjamuri, ``Decoding motor execution and motor imagery from EEG with deep learning and source localization,'' \emph{Biomedical Engineering Advances}, vol. 9, Art. no. 100156, 2025, doi: 10.1016/j.bea.2025.100156.
+\bibitem{wang2026me_mi} J. Wang, G. Xu, C. Du, Z. Li, H. Li, S. Chen, C. Han, and S. Zhang, ``Domain-aware domain-class adaptation network for motor execution to motor imagery EEG classification,'' \emph{Frontiers in Neuroscience}, vol. 20, 2026, doi: 10.3389/fnins.2026.1851006.
+\bibitem{hoerl1970ridge} A. E. Hoerl and R. W. Kennard, ``Ridge regression: Biased estimation for nonorthogonal problems,'' \emph{Technometrics}, vol. 12, no. 1, pp. 55--67, 1970.
+\bibitem{golub1979gcv} G. H. Golub, M. Heath, and G. Wahba, ``Generalized cross-validation as a method for choosing a good ridge parameter,'' \emph{Technometrics}, vol. 21, no. 2, pp. 215--223, 1979.
+\bibitem{song2023eegconformer} Y. Song \emph{et al.}, ``EEG Conformer: Convolutional transformer for EEG decoding and visualization,'' \emph{IEEE Trans. Neural Syst. Rehabil. Eng.}, vol. 31, pp. 710--719, 2023.
+\bibitem{chen2024eegnex} X. Chen \emph{et al.}, ``Toward reliable signals decoding for electroencephalogram: A benchmark study to EEGNeX,'' \emph{Biomed. Signal Process. Control}, vol. 87, Art. no. 105475, 2024.
+\bibitem{ingolfsson2020eegtcnet} T. M. Ingolfsson \emph{et al.}, ``EEG-TCNet: An accurate temporal convolutional network for embedded motor-imagery brain--machine interfaces,'' in \emph{Proc. IEEE Int. Conf. Syst., Man, Cybern. (SMC)}, 2020, pp. 2958--2965.
+\bibitem{altaheri2023atcnet} H. Altaheri \emph{et al.}, ``Physics-informed attention temporal convolutional network for EEG-based motor imagery classification,'' \emph{IEEE Trans. Ind. Inform.}, vol. 19, no. 2, pp. 2249--2258, 2023.
+\bibitem{liu2024msvtnet} K. Liu, T. Yang, Z. Yu, W. Yi, H. Yu, G. Wang, and W. Wu, ``MSVTNet: Multi-scale vision transformer neural network for EEG-based motor imagery decoding,'' \emph{IEEE J. Biomed. Health Inform.}, vol. 28, no. 12, pp. 7126--7137, 2024, doi: 10.1109/JBHI.2024.3450753.
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

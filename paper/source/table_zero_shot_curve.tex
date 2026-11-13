@@ -1,0 +1,19 @@
+\begin{table*}[!t]
+\caption{Canonical EEGMMIDB EEGNet support curve (104 participants, five matched outer folds). ME-only zero-shot is constant because it uses no MI labels. CIs are subject-level bootstrap intervals; $q$ is BH-FDR adjusted over the five paired comparisons, and W/T/L are ReAKT-C wins, ties, and losses. Differences use unrounded means before display rounding.}
+\label{tab:zero_shot_curve}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{c r r r r r c c c c}
+\toprule
+Support & ReAKT-C (\%) & Odd-only (\%) & ME-only (\%) & ME odd + support-even (\%) & $\Delta$ (pp) & 95\% CI & $p$ & $q$ & W/T/L\\
+\midrule
+0.20 & 76.85 & 76.27 & 77.26 & 76.79 & -0.40 & [-1.43,+0.63] & 0.312 & 0.312 & 44/17/43\\
+0.40 & 79.04 & 78.91 & 77.26 & 76.74 & +1.78 & [+0.96,+2.67] & $8.83\times10^{-4}$ & $1.10\times10^{-3}$ & 52/21/31\\
+0.60 & 79.76 & 79.79 & 77.26 & 77.05 & +2.50 & [+1.43,+3.64] & $1.79\times10^{-4}$ & $4.47\times10^{-4}$ & 56/24/24\\
+0.80 & 80.26 & 80.36 & 77.26 & 77.04 & +3.00 & [+1.93,+4.13] & $3.62\times10^{-6}$ & $1.81\times10^{-5}$ & 57/20/27\\
+1.00 & 79.75 & 79.86 & 77.26 & 77.25 & +2.49 & [+1.33,+3.66] & $3.38\times10^{-4}$ & $5.64\times10^{-4}$ & 58/16/30\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

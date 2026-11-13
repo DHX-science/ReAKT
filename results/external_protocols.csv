@@ -1,0 +1,14 @@
+protocol,support,reakt_c,zero_shot,delta,notes
+Lajtos ordinary five-fold,0.25,76.02,74.84,1.18,trial-stratified external protocol
+Lajtos ordinary five-fold,0.50,75.97,74.84,1.13,trial-stratified external protocol
+Lajtos ordinary five-fold,0.75,75.54,74.84,0.70,trial-stratified external protocol
+Lajtos ordinary five-fold,1.00,76.40,74.84,1.56,trial-stratified external protocol
+Lajtos strict LORO,0.25,75.16,74.84,0.32,three run-disjoint folds; all 31 participants
+Lajtos strict LORO,0.50,75.70,74.84,0.86,three run-disjoint folds; all 31 participants
+Lajtos strict LORO,0.75,75.86,74.84,1.02,three run-disjoint folds; all 31 participants
+Lajtos strict LORO,1.00,76.29,74.84,1.45,three run-disjoint folds; all 31 participants
+EEGMMIDB held-out run,0.20,76.35,77.26,-0.91,run-held-out internal protocol
+EEGMMIDB held-out run,0.40,77.93,77.26,0.67,run-held-out internal protocol
+EEGMMIDB held-out run,0.60,78.44,77.26,1.18,run-held-out internal protocol
+EEGMMIDB held-out run,0.80,79.88,77.26,2.63,run-held-out internal protocol
+EEGMMIDB held-out run,1.00,79.84,77.26,2.59,run-held-out internal protocol

@@ -1,0 +1,25 @@
+\begin{table*}[!t]
+\caption{Secondary metrics for the canonical EEGMMIDB control matrix (EEGNet, MI support fraction 0.20). These values correspond to the compact accuracy table in the main text.}
+\label{tab:primary_controls_metrics}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l r r r r r}
+\toprule
+Variant & Accuracy (\%) & Balanced accuracy (\%) & Macro-F1 (\%) & Kappa & ROC-AUC (\%) \\
+\midrule
+ReAKT-C & 76.85 & 76.72 & 75.21 & 0.529 & 84.15 \\
+ME-only zero-shot & 77.26 & 77.29 & 76.12 & 0.539 & 83.33 \\
+Odd-only & 76.27 & 76.09 & 74.58 & 0.516 & 83.97 \\
+Frozen $h$ + RBF-KRR & 72.48 & 72.23 & 70.01 & 0.440 & 78.81 \\
+Random involution & 73.60 & 73.45 & 71.56 & 0.464 & 80.37 \\
+Direct $[h,h^R]$ double-kernel & 72.98 & 72.72 & 70.58 & 0.450 & 78.93 \\
+ME-only odd + support-even & 76.79 & 76.77 & 75.70 & 0.529 & 82.99 \\
+Even-only & 57.62 & 57.18 & 52.72 & 0.142 & 61.57 \\
+Odd + even, no gate & 76.35 & 75.95 & 74.50 & 0.516 & 84.25 \\
+Local adjacent involution & 73.51 & 73.45 & 71.47 & 0.463 & 80.88 \\
+Mirror augmentation & 75.90 & 75.88 & 74.73 & 0.512 & 82.83 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

@@ -1,0 +1,22 @@
+{
+  "dataset": "EEGMMIDB",
+  "subjects": 104,
+  "channels": 64,
+  "sampling_rate_hz": 160,
+  "epoch_seconds": [0.0, 4.0],
+  "preprocessing": {
+    "bandpass_hz": [0.5, 50.0],
+    "ica_components": 20,
+    "ica_eog_reference_channels": ["Fp1", "Fp2"],
+    "ica_scope": "complete_run_before_epoching",
+    "baseline_seconds": [-0.5, 0.0],
+    "model_window_seconds": [0.0, 4.0]
+  },
+  "source_runs": ["R03", "R07", "R11"],
+  "target_runs": ["R04", "R08", "R12"],
+  "support_fractions": [0.2, 0.4, 0.6, 0.8, 1.0],
+  "outer_folds": 5,
+  "split_seed": 20260814,
+  "primary_backbone": "EEGNet",
+  "method": {"private_weight": 0.25, "ridge": 1.0}
+}

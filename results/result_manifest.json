@@ -1,0 +1,19 @@
+{
+  "source": "neurocomputing_submission_ReAKT_revision_D11_20261112_final_audited",
+  "status": "canonical manuscript summary",
+  "participant_level_predictions": false,
+  "raw_data_included": false,
+  "checkpoints_included": false,
+  "tables": [
+    "development_curve.csv",
+    "primary_controls.csv",
+    "classical_fbcsp_summary.csv",
+    "development_backbones.csv",
+    "external_backbones.csv",
+    "external_protocols.csv",
+    "zero_shot_inference.csv",
+    "fbcsp_inference.csv"
+  ],
+  "method_settings": {"private_weight": 0.25, "ridge": 1.0},
+  "notes": "Summary values are copied from the canonical manuscript tables; they are not a substitute for participant-level exports."
+}

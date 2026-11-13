@@ -1,0 +1,27 @@
+\begin{table}[H]
+\caption{Paired comparisons of ReAKT-C against ME-only zero-shot transfer. CIs are subject-level bootstrap intervals; $p$ is the raw paired Wilcoxon value and $q$ is BH-FDR adjusted within each task-specific support family. Wins/ties/losses refer to the ReAKT-C minus zero-shot accuracy contrast.}
+\label{tab:zero_shot_inference}
+\centering\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c r r r r r r c}
+\toprule
+Task & Support & ReAKT-C (\%) & Zero-shot (\%) & $\Delta$ (pp) & 95\% CI & $p$ & $q$ & W/T/L\\
+\midrule
+EEGMMIDB-dev & 0.20 & 76.85 & 77.26 & -0.40 & [-1.43,+0.63] & 3.12e-01 & 3.12e-01 & 44/17/43\\
+EEGMMIDB-dev & 0.40 & 79.04 & 77.26 & +1.78 & [+0.96,+2.67] & 8.83e-04 & 1.10e-03 & 52/21/31\\
+EEGMMIDB-dev & 0.60 & 79.76 & 77.26 & +2.50 & [+1.43,+3.64] & 1.79e-04 & 4.47e-04 & 56/24/24\\
+EEGMMIDB-dev & 0.80 & 80.26 & 77.26 & +3.00 & [+1.93,+4.13] & 3.62e-06 & 1.81e-05 & 57/20/27\\
+EEGMMIDB-dev & 1.00 & 79.75 & 77.26 & +2.49 & [+1.33,+3.66] & 3.38e-04 & 5.64e-04 & 58/16/30\\
+Held-out & 0.20 & 76.35 & 77.26 & -0.91 & [-1.81,-0.00] & 8.05e-02 & 1.01e-01 & 37/17/50\\
+Held-out & 0.40 & 77.93 & 77.26 & +0.67 & [-0.38,+1.74] & 2.16e-01 & 2.16e-01 & 50/11/43\\
+Held-out & 0.60 & 78.44 & 77.26 & +1.18 & [+0.12,+2.28] & 1.60e-02 & 2.67e-02 & 53/18/33\\
+Held-out & 0.80 & 79.88 & 77.26 & +2.63 & [+1.44,+3.85] & 9.78e-05 & 4.89e-04 & 62/14/28\\
+Held-out & 1.00 & 79.84 & 77.26 & +2.59 & [+1.35,+3.86] & 4.34e-04 & 1.09e-03 & 63/8/33\\
+Lajtos-5F & 0.25 & 76.02 & 74.84 & +1.18 & [-0.43,+2.74] & 1.15e-01 & 0.157 & 18/1/12\\
+Lajtos-5F & 0.50 & 75.97 & 74.84 & +1.13 & [-0.16,+2.47] & 1.18e-01 & 0.157 & 19/0/12\\
+Lajtos-5F & 0.75 & 75.54 & 74.84 & +0.70 & [-0.97,+2.26] & 4.59e-01 & 0.459 & 17/3/11\\
+Lajtos-5F & 1.00 & 76.40 & 74.84 & +1.56 & [-0.43,+3.39] & 5.45e-02 & 0.157 & 20/0/11\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

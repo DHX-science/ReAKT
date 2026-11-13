@@ -1,0 +1,24 @@
+{
+  "dataset": "Lajtos2023",
+  "subjects": 31,
+  "channels": 30,
+  "sampling_rate_hz": 160,
+  "epoch_seconds": [0.0, 4.0],
+  "preprocessing": {
+    "source_sampling_rate_hz": 500,
+    "bandpass_hz": [1.0, 40.0],
+    "filter": "1651-tap zero-phase FIR with Hamming window",
+    "reference": "common average",
+    "resampling": "polyphase 500 to 160 Hz",
+    "ica": false,
+    "artifact_rejection": false,
+    "interpolation": false,
+    "baseline_correction": false,
+    "augmentation": false,
+    "model_window_seconds": [0.0, 4.0]
+  },
+  "ordinary_protocol": {"folds": 5, "run_disjoint": false},
+  "loro_protocol": {"folds": 3, "run_disjoint": true},
+  "support_fractions": [0.25, 0.5, 0.75, 1.0],
+  "method": {"private_weight": 0.25, "ridge": 1.0}
+}

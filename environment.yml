@@ -1,0 +1,8 @@
+name: reakt-core
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.24
+  - scikit-learn>=1.2
+  - pytest>=7.4

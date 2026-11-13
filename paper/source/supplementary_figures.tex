@@ -1,0 +1,71 @@
+% Supplementary material for the Neurocomputing submission.
+\documentclass[preprint,12pt]{elsarticle}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{longtable}
+\begin{document}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\section*{Supplementary Material}
+The supplement contains the full versions of the primary tables and the sensitivity analyses needed to audit the calibration curve, the task-structured involution control matrix, the zero-shot comparison, the strict run-disjoint LORO analysis, and the cross-backbone results. Supplementary Figs.~S1--S2 report the engineering-cost and training-loss diagnostics cited in Methods; Fig.~S3 visualizes the primary gate-release diagnostic; Fig.~S4 gives the detailed cross-backbone profiles.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Supplementary_Fig_S2_efficiency_performance_cost.pdf}
+\caption{Engineering cost and adaptation-time comparison. The timing analysis uses three subjects per backbone.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Supplementary_Fig_S3_N3_training_validation_loss.pdf}
+\caption{Training and inner-validation cross-entropy loss for the tuned ME-pretrained frozen-backbone comparator across the five MI-support fractions.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\textwidth]{Fig6_gate_release_diagnostic.pdf}
+\caption{Primary gate-release diagnostic. The line shows the median fraction of outer-query trials receiving the private correction, the shaded region shows the interquartile range, and the dashed line shows the prespecified support-derived design target. Release rate is a gate diagnostic rather than a calibrated confidence estimate.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{Fig5_cross_backbone_profiles.pdf}
+\caption{Detailed cross-backbone transfer profiles. The six panels correspond to the prespecified representation backbones. Solid lines show the EEGMMIDB development protocol and dashed lines show the ordinary five-fold Lajtos 2023 protocol; in each protocol, ReAKT-C is compared with the strongest listed neural comparator for that backbone and support fraction. Bottom ticks show EEGMMIDB fractions and top ticks in the upper row show Lajtos fractions. Missing development cells remain blank and complement the main-text backbone matrices.}
+\end{figure}
+
+\clearpage
+\setcounter{table}{2}
+\input{table_n3_tuned_finetune.tex}
+\clearpage
+\input{table_component_ablation_original.tex}
+\clearpage
+\input{table_m1_controls.tex}
+\clearpage
+\input{table_m1_controls_metrics.tex}
+\clearpage
+\input{table_zero_shot_curve.tex}
+\clearpage
+\input{table_random_involution.tex}
+\clearpage
+\input{table_gate_distribution.tex}
+\clearpage
+\input{table_zero_shot_inference.tex}
+\clearpage
+\input{table_lajtos_loro.tex}
+\clearpage
+\input{table_friedman_fdr.tex}
+\clearpage
+\input{table_mechanism_diagnostic.tex}
+\clearpage
+\input{table_export_map.tex}
+\clearpage
+\input{table_development_by_backbone.tex}
+\clearpage
+\input{table_external_by_backbone.tex}
+\clearpage
+\input{table_fbcsp_inference.tex}
+\end{document}
+
+

@@ -1,0 +1,25 @@
+\begin{table*}[!t]
+\caption{Task-structured involution and target-label controls under the canonical primary protocol (EEGNet, 104 participants, MI support fraction 0.20). The compact main-text table reports accuracy and paired accuracy contrasts; the remaining metrics are given in the supplementary all-metrics table. Accuracy contrasts are ReAKT-C minus the listed variant. Group-only controls are left without imputed paired $p$ values.}
+\label{tab:primary_controls}
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l r r c c}
+\toprule
+Variant & Accuracy (\%) & $\Delta$ (pp) & 95\% CI (pp) & $p$; W/T/L \\
+\midrule
+ReAKT-C & 76.85 & -- & -- & -- \\
+ME-only zero-shot & 77.26 & -0.40 & [-1.42,0.60] & 0.312; 44/17/43 \\
+Odd-only & 76.27 & +0.58 & [0.11,1.06] & 0.0284; 37/44/23 \\
+Frozen $h$ + RBF-KRR & 72.48 & +4.37 & [2.92,5.78] & $4.17\times10^{-7}$; 70/12/22 \\
+Random involution & 73.60 & +3.26 & [1.76,4.74] & $7.53\times10^{-5}$; 63/14/27 \\
+Direct $[h,h_{\tau}]$ double-kernel & 72.98 & +3.88 & [2.52,5.18] & $1.61\times10^{-6}$; 68/15/21 \\
+ME-only odd + support-even & 76.79 & +0.06 & -- & -- \\
+Even-only & 57.62 & +19.23 & -- & -- \\
+Odd + even, no gate & 76.35 & +0.50 & -- & -- \\
+Local adjacent involution & 73.51 & +3.34 & -- & -- \\
+Mirror augmentation & 75.90 & +0.95 & -- & -- \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

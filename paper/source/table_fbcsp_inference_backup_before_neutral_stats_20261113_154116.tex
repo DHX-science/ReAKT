@@ -1,0 +1,23 @@
+\begin{table*}[!t]
+\caption{FBCSP-LDA comparison for the rerun protocols. FBCSP-LDA was fitted only on the labelled MI support trials. Differences are ReAKT-C minus FBCSP-LDA; Lajtos $q$ values are BH-FDR adjusted across its four support comparisons. EEGMMIDB entries are descriptive because the canonical ReAKT curve export does not retain a matching FBCSP subject-prediction pairing; the interval is the subject-mean 95\% normal interval.}
+\label{tab:fbcsp_inference}
+\centering\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c r r r r l}
+\toprule
+Dataset & Support & $n$ & ReAKT-C (\%) & FBCSP-LDA (\%) & $\Delta$ (pp) & 95\% CI / Wilcoxon $p$ / $q$ \\
+\midrule
+EEGMMIDB & 0.20 & 104 & 76.85 & 50.97 & +25.88 & [50.00,51.94] / descriptive \\
+EEGMMIDB & 0.40 & 104 & 79.04 & 52.50 & +26.54 & [51.21,53.79] / descriptive \\
+EEGMMIDB & 0.60 & 104 & 79.76 & 53.18 & +26.58 & [51.47,54.90] / descriptive \\
+EEGMMIDB & 0.80 & 104 & 80.26 & 56.09 & +24.17 & [54.21,57.96] / descriptive \\
+EEGMMIDB & 1.00 & 104 & 79.75 & 53.32 & +26.43 & [51.25,55.39] / descriptive \\
+\addlinespace
+Lajtos 2023 & 0.25 & 31 & 76.02 & 59.68 & +16.34 & 1.67e-4 / 6.68e-4 \\
+Lajtos 2023 & 0.50 & 31 & 75.97 & 64.25 & +11.72 & 3.72e-3 / 7.45e-3 \\
+Lajtos 2023 & 0.75 & 31 & 75.54 & 68.17 & +7.37 & 4.35e-2 / 5.80e-2 \\
+Lajtos 2023 & 1.00 & 31 & 76.40 & 72.15 & +4.25 & 2.36e-1 / 2.36e-1 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

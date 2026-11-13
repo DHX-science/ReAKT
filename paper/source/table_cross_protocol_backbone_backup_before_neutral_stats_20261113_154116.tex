@@ -1,0 +1,31 @@
+\begin{table*}[!t]
+\caption{Descriptive cross-protocol backbone comparison at the lowest prespecified MI-support budget. The two protocols use the same representation backbone and the same five neural comparators; values are subject-level mean accuracies (\%). $\Delta_{\mathrm{best}}$ is ReAKT-C minus the strongest displayed baseline, computed from the displayed means and rounded to two decimals. No paired inference was performed for non-EEGNet backbone cells; formal paired inference is reported only for the canonical EEGNet comparisons.}
+\label{tab:cross_protocol_backbone}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.08}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c l r r r r r r r}
+\toprule
+Protocol & Support & Backbone & ME-Finetune & ME-Joint & Deep CORAL & DANN & CDAN & ReAKT-C & $\Delta_{\mathrm{best}}$\\
+\midrule
+Development & 0.20 & EEGNet & 72.63 & 70.82 & 72.83 & 73.54 & 73.49 & 76.85 & +3.31\\
+Development & 0.20 & EEG-Conformer & 67.94 & 64.86 & 70.08 & 70.10 & 69.74 & 74.22 & +4.12\\
+Development & 0.20 & EEGNeX & 71.99 & 71.50 & 72.42 & 72.61 & 72.31 & 76.39 & +3.78\\
+Development & 0.20 & EEG-TCNet & 67.75 & 61.70 & 67.86 & 67.83 & 67.93 & 74.80 & +6.87\\
+Development & 0.20 & ATCNet & 71.30 & 67.02 & 72.01 & 71.70 & 71.70 & 75.80 & +3.79\\
+Development & 0.20 & MSVTNet & 63.89 & 61.41 & 65.00 & 65.03 & 65.01 & 66.89 & +1.86\\
+\addlinespace
+Lajtos external & 0.25 & EEGNet & 70.54 & 62.15 & 70.32 & 70.05 & 70.16 & 76.02 & +5.48\\
+Lajtos external & 0.25 & EEG-Conformer & 66.29 & 58.28 & 67.15 & 67.04 & 67.37 & 73.92 & +6.55\\
+Lajtos external & 0.25 & EEGNeX & 70.75 & 67.31 & 72.42 & 69.95 & 70.75 & 75.43 & +3.01\\
+Lajtos external & 0.25 & EEG-TCNet & 59.03 & 53.55 & 59.68 & 59.57 & 59.41 & 68.39 & +8.71\\
+Lajtos external & 0.25 & ATCNet & 66.18 & 59.41 & 66.24 & 66.34 & 66.02 & 72.90 & +6.56\\
+Lajtos external & 0.25 & MSVTNet & 60.27 & 54.14 & 61.13 & 59.62 & 59.09 & 65.11 & +3.98\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+

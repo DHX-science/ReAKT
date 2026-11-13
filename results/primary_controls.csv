@@ -1,0 +1,12 @@
+variant,accuracy,delta_vs_reakt_c,ci_low,ci_high,p_raw,wins,ties,losses
+ReAKT-C,76.85,0.00,,,,,,
+ME-only zero-shot,77.26,-0.40,-1.42,0.60,0.312,44,17,43
+Odd-only,76.27,0.58,0.11,1.06,0.0284,37,44,23
+Frozen h + RBF-KRR,72.48,4.37,2.92,5.78,0.000000417,70,12,22
+Random involution,73.60,3.26,1.76,4.74,0.0000753,63,14,27
+"Direct [h,h_R] double-kernel",72.98,3.88,2.52,5.18,0.00000161,68,15,21
+ME-only odd + support-even,76.79,0.06,,,,,,
+Even-only,57.62,19.23,,,,,,
+"Odd + even, no gate",76.35,0.50,,,,,,
+Local adjacent involution,73.51,3.34,,,,,,
+Mirror augmentation,75.90,0.95,,,,,,
